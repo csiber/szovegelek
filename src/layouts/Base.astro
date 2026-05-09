@@ -1,0 +1,91 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const {
+  title,
+  description = 'Szövegelek.hu — magyar AI-copywriter KKV-knek. Termékleírás, hirdetés, e-mail, FB-poszt — szerves magyar nyelven, percek alatt.',
+} = Astro.props;
+
+const fullTitle = title.includes('Szövegelek') ? title : `${title} · Szövegelek`;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://szovegelek.hu').href;
+---
+
+<!doctype html>
+<html lang="hu">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#e44a6b" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Lora:ital,wght@1,500;1,600&display=swap" />
+
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content="hu_HU" />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body class="antialiased min-h-screen">
+    <header class="bg-white border-b border-sz-border sticky top-0 z-30">
+      <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+        <a href="/" class="flex items-center gap-2 font-bold text-lg text-sz-text">
+          <span class="inline-flex items-center justify-center w-9 h-9 bg-sz-accent text-white rounded-xl font-bold shadow-sm text-base" aria-hidden="true">✎</span>
+          <span>Szövegelek<span class="font-normal text-sz-text-dim text-xs ml-0.5">.hu</span></span>
+        </a>
+        <nav class="hidden md:flex items-center gap-5 text-sm">
+          <a href="/#hogyan" class="text-sz-text-mid hover:text-sz-accent transition-colors">Hogyan működik</a>
+          <a href="/#sablonok" class="text-sz-text-mid hover:text-sz-accent transition-colors">Sablonok</a>
+          <a href="/#arak" class="text-sz-text-mid hover:text-sz-accent transition-colors">Árak</a>
+        </nav>
+        <a href="/probald" class="sz-btn-primary text-sm">
+          Próbáld ki ingyen →
+        </a>
+      </div>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="bg-white border-t border-sz-border mt-16">
+      <div class="max-w-6xl mx-auto px-4 py-8 text-sm">
+        <div class="flex flex-wrap items-start justify-between gap-6">
+          <div>
+            <div class="flex items-center gap-2 font-bold text-base text-sz-text mb-2">
+              <span class="inline-flex items-center justify-center w-7 h-7 bg-sz-accent text-white rounded-lg text-sm" aria-hidden="true">✎</span>
+              <span>Szövegelek.hu</span>
+            </div>
+            <p class="text-xs text-sz-text-dim max-w-md leading-relaxed">
+              Magyar AI-copywriter KKV-knek. Termékleírás, hirdetés-szöveg, e-mail-vázlat
+              — magyar nyelven, percek alatt.
+            </p>
+          </div>
+          <div class="text-xs text-sz-text-dim space-y-1">
+            <p class="font-semibold text-sz-text-mid mb-1.5">Társ-szolgáltatások</p>
+            <a href="https://navbot.hu" class="block hover:text-sz-accent transition-colors">
+              🛒 NavBot.hu — webshop, NAV-számla, helpdesk
+            </a>
+            <a href="https://promnet.hu" class="block hover:text-sz-accent transition-colors">
+              ☁️ PromNET.hu — magyar Cloudflare-rátét
+            </a>
+          </div>
+        </div>
+        <div class="border-t border-sz-border mt-6 pt-4 flex flex-wrap items-center justify-between gap-3 text-[11px] text-sz-text-muted">
+          <span>© 2026 Szövegelek.hu — Polyák Csaba e.v.</span>
+          <span class="font-mono">Magyar fejlesztő · CF-Pages · Workers AI</span>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>

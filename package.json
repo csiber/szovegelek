@@ -1,0 +1,24 @@
+{
+  "name": "szovegelek",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev --port 4323",
+    "build": "astro build",
+    "preview": "wrangler pages dev ./dist --compatibility-date=2024-09-23 --compatibility-flags=nodejs_compat",
+    "deploy": "wrangler pages deploy ./dist"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^12.0.0",
+    "@astrojs/sitemap": "^3.2.1",
+    "@astrojs/tailwind": "^5.1.4",
+    "astro": "^5.0.0",
+    "tailwindcss": "^3.4.16"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2",
+    "wrangler": "^3.95.0"
+  }
+}

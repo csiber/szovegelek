@@ -1,0 +1,19 @@
+name = "szovegelek"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "dist"
+
+# Közös D1 a PromNET + NavBot-tal — egy fiók, egy kvóta, közös user-bázis.
+[[d1_databases]]
+binding = "DB"
+database_name = "promnet-prod"
+database_id = "6ae31f06-a817-44c9-a0ae-7ef090fb0d43"
+
+# Workers AI (Llama-3.3 + FLUX) — magyar copy-generálás
+[ai]
+binding = "AI"
+
+# R2 (közös) — generált anyagok cache-elhetők
+[[r2_buckets]]
+binding = "STORAGE"
+bucket_name = "promnet-assets"

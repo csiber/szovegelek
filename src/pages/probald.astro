@@ -1,0 +1,201 @@
+---
+import Base from '../layouts/Base.astro';
+
+const TEMPLATES = [
+  { id: 'product',  emoji: '🛍',  name: 'Termékleírás',         desc: 'Webshop-termékhez 3 verziót generál (rövid / közepes / hosszú).' },
+  { id: 'fb_ad',    emoji: '📣',  name: 'Facebook-hirdetés',    desc: '3-soros hirdetés-szöveg, hook + value + CTA.' },
+  { id: 'email',    emoji: '📧',  name: 'E-mail',              desc: 'Tárgy + bevezető + zárás. Hideg-cold vagy meleg-cold.' },
+  { id: 'instagram',emoji: '📸',  name: 'Instagram-poszt',      desc: 'Caption + 5-7 hashtag, 2200 char alatt.' },
+  { id: 'blog',     emoji: '📝',  name: 'Blog-poszt vázlat',    desc: 'Cím + 4 szekció-alpont + CTA. Te kifejted.' },
+  { id: 'gads',     emoji: '🎯',  name: 'Google Ads címsor',    desc: '3 darab 30-karakteres címsor + 2 db 90-karakteres leírás.' },
+  { id: 'aszf',     emoji: '📜',  name: 'ÁSZF összegzés',      desc: 'Bonyolult ÁSZF-ből 5-mondatos közérthető-summary.' },
+  { id: 'linkedin', emoji: '💼',  name: 'LinkedIn-poszt',       desc: 'Pro-tone-osztásra: storytelling + insight, 1300 char alatt.' },
+  { id: 'press',    emoji: '📰',  name: 'Sajtóközlemény',       desc: 'Cím + lead + 3 bekezdés. Magyar média-style.' },
+];
+---
+
+<Base title="Próbáld ki — Szövegelek" description="20 ingyenes generálás regisztráció nélkül. Válassz sablont, írd le mit kell, kapsz 3 verziót.">
+  <div class="max-w-5xl mx-auto px-4 py-10">
+    <header class="text-center mb-8 sz-fade-up">
+      <h1 class="text-3xl md:text-4xl font-bold text-sz-text mb-2">
+        Mit írjunk?
+      </h1>
+      <p class="text-sm text-sz-text-mid">
+        Válaszd a sablont, töltsd ki a 2 mezőt, kattints. <strong class="text-sz-text">5 mp alatt 3 verzió.</strong>
+      </p>
+      <p class="text-xs text-sz-text-muted mt-2 font-mono" id="quota-info">
+        20 ingyen generálás / IP / hó · regisztrációval +30 azonnal
+      </p>
+    </header>
+
+    {/* TEMPLATE-választó */}
+    <div class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-2 mb-6 sz-fade-up-1">
+      {TEMPLATES.map((t) => (
+        <button type="button" data-template={t.id}
+                class="template-btn flex flex-col items-center gap-1 px-3 py-3 bg-white border-2 border-sz-border rounded-xl hover:border-sz-accent hover:bg-sz-accent-l/20 transition-all">
+          <span class="text-2xl">{t.emoji}</span>
+          <span class="text-[10px] font-semibold text-center leading-tight">{t.name}</span>
+        </button>
+      ))}
+    </div>
+
+    {/* INPUT-form */}
+    <div class="sz-card mb-6 sz-fade-up-2">
+      <div id="active-template" class="text-xs text-sz-text-dim mb-4 hidden">
+        Aktív sablon: <strong id="active-template-name" class="text-sz-text"></strong>
+        — <span id="active-template-desc"></span>
+      </div>
+
+      <label class="block text-sm font-bold text-sz-text mb-2">
+        1. Mire kell? (1-2 mondat)
+        <span class="font-normal text-xs text-sz-text-dim ml-1">— termék, szolgáltatás, esemény, ami a fő-tárgy</span>
+      </label>
+      <textarea id="topic" rows="3" maxlength="500"
+                placeholder="pl. Levendula krém, kézzel készült, magyar farmról, 50 ml — bőrnyugtató, este használjon"
+                class="w-full bg-sz-bg-2 border border-sz-border rounded-lg px-3 py-2.5 text-sm focus:border-sz-accent focus:outline-none transition-colors resize-y"></textarea>
+
+      <div class="grid sm:grid-cols-2 gap-4 mt-4">
+        <div>
+          <label class="block text-sm font-bold text-sz-text mb-2">2. Hangulat</label>
+          <select id="tone" class="w-full bg-sz-bg-2 border border-sz-border rounded-lg px-3 py-2 text-sm focus:border-sz-accent focus:outline-none transition-colors">
+            <option value="friendly">Barátságos, közvetlen</option>
+            <option value="professional">Szakmai, komoly</option>
+            <option value="playful">Játékos, humoros</option>
+            <option value="luxury">Prémium, exkluzív</option>
+            <option value="urgent">Sürgős, akciós</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-bold text-sz-text mb-2">3. Célcsoport (opcionális)</label>
+          <input type="text" id="audience" maxlength="100"
+                 placeholder="pl. fiatal anyukák, retró-rajongók"
+                 class="w-full bg-sz-bg-2 border border-sz-border rounded-lg px-3 py-2 text-sm focus:border-sz-accent focus:outline-none transition-colors" />
+        </div>
+      </div>
+
+      <button type="button" id="gen-btn"
+              class="sz-btn-primary mt-5 w-full sm:w-auto px-8 py-3 text-base"
+              disabled>
+        ✨ Generálj 3 verziót
+      </button>
+      <p id="gen-msg" class="text-xs mt-3 hidden"></p>
+    </div>
+
+    {/* OUTPUT */}
+    <div id="output" class="hidden">
+      <h2 class="text-lg font-bold text-sz-text mb-3 flex items-center gap-2">
+        <span>📝</span>
+        <span>Generált verziók</span>
+      </h2>
+      <div id="output-content" class="space-y-3"></div>
+    </div>
+  </div>
+
+  <script>
+    const TEMPLATE_META = {
+      product:   { name: 'Termékleírás',    desc: 'Webshop-termékhez 3 verziót generál' },
+      fb_ad:     { name: 'Facebook-hirdetés', desc: '3-soros hirdetés-szöveg' },
+      email:     { name: 'E-mail',           desc: 'Tárgy + bevezető + zárás' },
+      instagram: { name: 'Instagram-poszt',  desc: 'Caption + hashtag-ek' },
+      blog:      { name: 'Blog-poszt vázlat', desc: 'Cím + 4 szekció + CTA' },
+      gads:      { name: 'Google Ads címsor', desc: '3 címsor + 2 leírás' },
+      aszf:      { name: 'ÁSZF összegzés',   desc: '5-mondatos summary' },
+      linkedin:  { name: 'LinkedIn-poszt',   desc: 'Pro storytelling-poszt' },
+      press:     { name: 'Sajtóközlemény',   desc: 'Cím + lead + 3 bekezdés' },
+    };
+
+    let activeTemplate = null;
+    const btns = document.querySelectorAll('[data-template]');
+    const genBtn = document.getElementById('gen-btn');
+    const activeBox = document.getElementById('active-template');
+    const activeName = document.getElementById('active-template-name');
+    const activeDesc = document.getElementById('active-template-desc');
+    const topic = document.getElementById('topic');
+
+    btns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        activeTemplate = btn.dataset.template;
+        btns.forEach((b) => b.classList.remove('!border-sz-accent', 'bg-sz-accent-l'));
+        btn.classList.add('!border-sz-accent', 'bg-sz-accent-l');
+        const meta = TEMPLATE_META[activeTemplate];
+        if (meta && activeBox && activeName && activeDesc) {
+          activeName.textContent = meta.name;
+          activeDesc.textContent = meta.desc;
+          activeBox.classList.remove('hidden');
+        }
+        updateGenBtn();
+      });
+    });
+
+    topic?.addEventListener('input', updateGenBtn);
+
+    function updateGenBtn() {
+      const ok = activeTemplate && topic && topic.value.trim().length > 5;
+      genBtn.disabled = !ok;
+    }
+
+    genBtn?.addEventListener('click', async () => {
+      const msg = document.getElementById('gen-msg');
+      const output = document.getElementById('output');
+      const outContent = document.getElementById('output-content');
+
+      genBtn.disabled = true;
+      const origText = genBtn.textContent;
+      genBtn.innerHTML = '<span class="inline-block animate-spin mr-2">⏳</span> Promi gondolkodik…';
+      msg.classList.add('hidden');
+      output?.classList.add('hidden');
+
+      try {
+        const r = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            template: activeTemplate,
+            topic: topic.value.trim(),
+            tone: document.getElementById('tone').value,
+            audience: document.getElementById('audience').value.trim(),
+          }),
+        });
+        const j = await r.json();
+        if (!r.ok || !j.ok) throw new Error(j.error || `HTTP ${r.status}`);
+
+        outContent.innerHTML = '';
+        (j.versions || []).forEach((v, i) => {
+          const card = document.createElement('div');
+          card.className = 'sz-card sz-fade-up-' + Math.min(3, i + 1);
+          const labels = ['🌶 Rövid', '🥗 Közepes', '📚 Hosszú'];
+          card.innerHTML = `
+            <div class="flex items-center justify-between mb-2">
+              <div class="text-xs font-mono text-sz-accent uppercase">${labels[i] || ('Verzió ' + (i+1))}</div>
+              <button data-copy="${i}" class="text-xs text-sz-text-mid hover:text-sz-accent transition-colors px-2 py-1">📋 Másol</button>
+            </div>
+            <div class="text-sm text-sz-text leading-relaxed whitespace-pre-wrap">${v}</div>
+          `;
+          outContent.appendChild(card);
+          card.querySelector('[data-copy]')?.addEventListener('click', async () => {
+            await navigator.clipboard.writeText(v);
+            const btn = card.querySelector('[data-copy]');
+            const t = btn.textContent;
+            btn.textContent = '✓ Másolva';
+            setTimeout(() => { btn.textContent = t; }, 1500);
+          });
+        });
+        output?.classList.remove('hidden');
+        output?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        if (j.quota_remaining != null) {
+          document.getElementById('quota-info').textContent =
+            `${j.quota_remaining} ingyen generálás maradt ezen az IP-n · regisztrációval +30 azonnal`;
+        }
+      } catch (e) {
+        msg.textContent = '⚠ ' + e.message;
+        msg.className = 'text-xs mt-3 text-red-600 font-semibold';
+        msg.classList.remove('hidden');
+      } finally {
+        genBtn.disabled = false;
+        genBtn.textContent = origText;
+        updateGenBtn();
+      }
+    });
+  </script>
+</Base>

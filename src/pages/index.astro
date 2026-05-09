@@ -1,0 +1,261 @@
+---
+import Base from '../layouts/Base.astro';
+
+const SAMPLES = [
+  { kind: 'Termékleírás · webshop',
+    in: 'Levendula krém, kézzel készült, magyar farmról, 50 ml',
+    out: 'Csendes magyar farm, levendula-mező a háttérben — minden gramm krém innen jön. 50 ml, kézzel kevert, parabén- és illatfokozó-mentes. Bőrnyugtató, este lefekvés előtt egy csepp az arcra. Limitált, hetente 30 db készül.' },
+  { kind: 'Facebook-hirdetés · 3 sor',
+    in: 'Fodrászatom Pesterzsébeten, hétvégi időpontok',
+    out: 'Pesterzsébeten élsz és nem találsz hétvégére jó fodrászt? 💇‍♀️ Szombat-vasárnap is nyitva tartunk, online időpontfoglalás 30 mp. Első alkalommal -20%.' },
+  { kind: 'E-mail · követés rendelés után',
+    in: 'Étterem rendelés-after: hogyan ízlett, kérek visszajelzést',
+    out: 'Kedves Vendég! Köszönjük hogy minket választott — remélem ízlett a vacsora. Egy gyors kérdés: 1 mondatban hogy értékelné? Válaszolnia se kell, csak gondoljon ránk a következő rendeléskor. Üdvözlettel, [Vendéglős]' },
+];
+---
+
+<Base
+  title="Szövegelek — magyar AI-copywriter KKV-knek"
+  description="Termékleírás, hirdetés-szöveg, e-mail-vázlat magyar nyelven percek alatt. Webshopon, FB-en, e-mailben — Promi AI írja, te csiszolod."
+>
+  {/* HERO */}
+  <section class="bg-gradient-to-b from-sz-bg-3 to-sz-bg overflow-hidden">
+    <div class="max-w-5xl mx-auto px-4 pt-14 pb-16 text-center">
+      <div class="sz-fade-up inline-flex items-center gap-2 mb-5 px-3 py-1 bg-white border border-sz-border-2 rounded-full text-xs font-semibold text-sz-accent shadow-sm">
+        <span class="w-1.5 h-1.5 rounded-full bg-sz-accent sz-pulse-soft"></span>
+        Magyar AI · KKV-knek készült
+      </div>
+      <h1 class="sz-fade-up-1 text-4xl md:text-6xl font-bold tracking-tight mb-5 text-sz-text leading-tight">
+        Az ügyfeled <span class="serif italic text-sz-accent">akkor olvas el</span>,<br/>
+        ha jól van leírva.
+      </h1>
+      <p class="sz-fade-up-2 text-lg md:text-xl text-sz-text-mid mb-8 max-w-2xl mx-auto leading-relaxed">
+        Termékleírás · hirdetés-szöveg · e-mail-vázlat — <strong class="text-sz-text">magyar nyelven, percek alatt</strong>.
+        Nem angol-fordítás, nem körülírós AI-szöveg. Magyar copywriter Promi-tól, KKV-fejjel.
+      </p>
+      <div class="sz-fade-up-3 flex items-center justify-center gap-3 flex-wrap mb-6">
+        <a href="/probald" class="sz-btn-primary text-base px-6 py-3 shadow-md">
+          Írjunk valamit ingyen →
+        </a>
+        <a href="#hogyan" class="sz-btn-secondary text-base px-6 py-3">
+          Hogyan működik?
+        </a>
+      </div>
+      <p class="text-xs text-sz-text-muted">
+        20 ingyenes generálás regisztráció nélkül · Bankkártya nem kell
+      </p>
+    </div>
+  </section>
+
+  {/* PAIN-POINT — összehasonlítás */}
+  <section class="bg-white border-y border-sz-border">
+    <div class="max-w-4xl mx-auto px-4 py-14">
+      <h2 class="text-2xl md:text-3xl font-bold text-center mb-8 text-sz-text">
+        Eddig mit csináltál?
+      </h2>
+      <div class="grid md:grid-cols-3 gap-3 max-w-3xl mx-auto">
+        <div class="bg-sz-bg-2 rounded-xl p-5">
+          <div class="text-2xl mb-2">😵‍💫</div>
+          <div class="font-bold text-sm mb-1.5 text-sz-text">"ChatGPT magyarul"</div>
+          <p class="text-xs text-sz-text-mid leading-relaxed">
+            "Generál egy szöveget" — utána órákig csiszolgatod, mert robotos. Plus angol-billentyű-arc.
+          </p>
+        </div>
+        <div class="bg-sz-bg-2 rounded-xl p-5">
+          <div class="text-2xl mb-2">📝</div>
+          <div class="font-bold text-sm mb-1.5 text-sz-text">"Megírom magam"</div>
+          <p class="text-xs text-sz-text-mid leading-relaxed">
+            30 termékre 30 leírás = 4 óra. Hirdetés-szöveg minden héten? Időt rabol a fő-üzletedtől.
+          </p>
+        </div>
+        <div class="bg-sz-bg-2 rounded-xl p-5">
+          <div class="text-2xl mb-2">💸</div>
+          <div class="font-bold text-sm mb-1.5 text-sz-text">"Felveszek copy-st"</div>
+          <p class="text-xs text-sz-text-mid leading-relaxed">
+            150 000 Ft havidíj fix-fizetés-re? Vagy projekt-alapon 10-25k / szöveg? KKV-méretre nem fér.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-8 max-w-2xl mx-auto bg-sz-accent-l border-2 border-sz-accent rounded-2xl p-6 text-center">
+        <div class="text-3xl mb-2">✎</div>
+        <div class="font-bold text-lg mb-1 text-sz-text">Szövegelek: 2 990 Ft / hó</div>
+        <p class="text-sm text-sz-text-mid">
+          200 generálás, 9 magyar piacra szabott sablon, akármikor felmondható.
+          A fő-szöveget Promi írja — te csiszolod a részleteken.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {/* HOGYAN — 3 lépés */}
+  <section id="hogyan" class="max-w-5xl mx-auto px-4 py-14">
+    <div class="text-center mb-10">
+      <p class="font-mono text-xs text-sz-accent uppercase tracking-wider mb-2">3 lépés</p>
+      <h2 class="text-2xl md:text-3xl font-bold text-sz-text">Hogyan használd?</h2>
+    </div>
+    <div class="grid md:grid-cols-3 gap-5">
+      <div class="sz-card relative">
+        <div class="absolute -top-3 -left-3 w-8 h-8 bg-sz-accent text-white rounded-full flex items-center justify-center font-bold text-sm shadow-md">1</div>
+        <div class="text-3xl mb-3">📋</div>
+        <h3 class="font-bold text-base mb-2">Válaszd a sablont</h3>
+        <p class="text-sm text-sz-text-mid leading-relaxed">
+          Termékleírás · FB-hirdetés · e-mail · blog-poszt-váz · IG-poszt · Google-Ads-cím · ÁSZF-summary · LinkedIn-poszt · sajtóközlemény.
+        </p>
+      </div>
+      <div class="sz-card relative">
+        <div class="absolute -top-3 -left-3 w-8 h-8 bg-sz-accent text-white rounded-full flex items-center justify-center font-bold text-sm shadow-md">2</div>
+        <div class="text-3xl mb-3">💬</div>
+        <h3 class="font-bold text-base mb-2">Mondd el mit kell</h3>
+        <p class="text-sm text-sz-text-mid leading-relaxed">
+          Pár kulcsszó: termék-név, célcsoport, hangulat (humoros / komoly / barátságos), max-hossz.
+          Promi a többit kitalálja.
+        </p>
+      </div>
+      <div class="sz-card relative">
+        <div class="absolute -top-3 -left-3 w-8 h-8 bg-sz-accent text-white rounded-full flex items-center justify-center font-bold text-sm shadow-md">3</div>
+        <div class="text-3xl mb-3">✨</div>
+        <h3 class="font-bold text-base mb-2">3 verzió 5 mp alatt</h3>
+        <p class="text-sm text-sz-text-mid leading-relaxed">
+          Kapsz 3 különböző tónusú verziót (rövid / közepes / hosszú). Választasz, finomítasz, használod.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  {/* SABLONOK + példák */}
+  <section id="sablonok" class="bg-sz-bg-2 border-y border-sz-border">
+    <div class="max-w-5xl mx-auto px-4 py-14">
+      <div class="text-center mb-10">
+        <p class="font-mono text-xs text-sz-accent uppercase tracking-wider mb-2">live példák</p>
+        <h2 class="text-2xl md:text-3xl font-bold text-sz-text">Nézd meg mit ír Promi</h2>
+        <p class="text-sm text-sz-text-mid mt-2">
+          Igazi magyar mondatok — nem angol-fordítás, nem ChatGPT-stílus.
+        </p>
+      </div>
+      <div class="space-y-4 max-w-3xl mx-auto">
+        {SAMPLES.map((s) => (
+          <div class="sz-card">
+            <div class="text-[10px] font-mono uppercase tracking-wider text-sz-accent mb-2">{s.kind}</div>
+            <div class="text-xs text-sz-text-dim mb-2"><strong>Bemenet:</strong> {s.in}</div>
+            <div class="bg-sz-bg-2 border-l-4 border-sz-accent rounded-r p-3 text-sm text-sz-text leading-relaxed serif italic">
+              "{s.out}"
+            </div>
+          </div>
+        ))}
+      </div>
+      <div class="text-center mt-8">
+        <a href="/probald" class="sz-btn-primary px-6 py-3">
+          Próbáld a sajátoddal →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  {/* ÁRAK */}
+  <section id="arak" class="max-w-5xl mx-auto px-4 py-14">
+    <div class="text-center mb-10">
+      <p class="font-mono text-xs text-sz-accent uppercase tracking-wider mb-2">árazás</p>
+      <h2 class="text-2xl md:text-3xl font-bold text-sz-text mb-2">Egyszerű, magyar, Ft-os</h2>
+      <p class="text-sm text-sz-text-mid">Bankkártya nélkül indulhatsz · NAV-konform Ft-számla</p>
+    </div>
+    <div class="grid sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
+      <div class="sz-card text-center">
+        <div class="font-mono text-xs text-sz-text-muted uppercase mb-1">FREE</div>
+        <div class="text-2xl font-bold text-sz-text mb-1">0 Ft</div>
+        <p class="text-xs text-sz-text-dim mb-4">örökre</p>
+        <ul class="text-xs text-sz-text-mid space-y-1.5 mb-4 text-left">
+          <li>✓ 20 generálás/hó</li>
+          <li>✓ 4 alap-sablon</li>
+          <li>✓ 3 verzió generálásonként</li>
+        </ul>
+        <a href="/probald" class="block text-center text-sm py-2 border border-sz-border-2 rounded-lg hover:border-sz-accent hover:text-sz-accent transition-colors">
+          Indítok →
+        </a>
+      </div>
+
+      <div class="sz-card border-2 border-sz-accent bg-sz-accent-l/30 text-center relative">
+        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-sz-accent text-white text-[10px] font-mono uppercase px-2 py-0.5 rounded">népszerű</div>
+        <div class="font-mono text-xs text-sz-accent uppercase mb-1">START</div>
+        <div class="text-2xl font-bold text-sz-text mb-1">2 990 Ft</div>
+        <p class="text-xs text-sz-text-dim mb-4">/ hó</p>
+        <ul class="text-xs text-sz-text-mid space-y-1.5 mb-4 text-left">
+          <li>✓ 200 generálás/hó</li>
+          <li>✓ Mind a 9 sablon</li>
+          <li>✓ Brand-hang mentés</li>
+          <li>✓ Bulk-generálás (CSV-be)</li>
+          <li>✓ Webshop-integráció</li>
+        </ul>
+        <a href="/probald?plan=start" class="block text-center text-sm py-2 bg-sz-accent text-white rounded-lg hover:bg-sz-accent-h transition-colors font-semibold">
+          14 napos próba →
+        </a>
+      </div>
+
+      <div class="sz-card text-center">
+        <div class="font-mono text-xs text-sz-text-muted uppercase mb-1">PRO</div>
+        <div class="text-2xl font-bold text-sz-text mb-1">9 990 Ft</div>
+        <p class="text-xs text-sz-text-dim mb-4">/ hó</p>
+        <ul class="text-xs text-sz-text-mid space-y-1.5 mb-4 text-left">
+          <li>✓ Korlátlan generálás</li>
+          <li>✓ Custom-prompt-templatek</li>
+          <li>✓ Csapat (5 user)</li>
+          <li>✓ API-hozzáférés</li>
+          <li>✓ Prioritás-támogatás</li>
+        </ul>
+        <a href="/probald?plan=pro" class="block text-center text-sm py-2 border border-sz-border-2 rounded-lg hover:border-sz-accent hover:text-sz-accent transition-colors">
+          Pro start →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  {/* CROSS-BRAND family */}
+  <section class="bg-sz-bg-2 border-y border-sz-border">
+    <div class="max-w-4xl mx-auto px-4 py-12">
+      <div class="text-center mb-6">
+        <p class="font-mono text-xs text-sz-accent uppercase tracking-wider mb-2">SaaS-család</p>
+        <h2 class="text-2xl font-bold text-sz-text">Egy fiók, három brand</h2>
+        <p class="text-sm text-sz-text-mid mt-2 max-w-2xl mx-auto">
+          A Szövegelek a magyar SMB-ökoszisztéma harmadik tagja. Ha NavBot-on vagy
+          PromNET-en már fent vagy, ide is ugyanazzal a fiókkal lépsz be — egy számla.
+        </p>
+      </div>
+      <div class="grid sm:grid-cols-3 gap-3 max-w-3xl mx-auto">
+        <a href="https://navbot.hu" class="sz-card hover:border-sz-accent transition-all hover:-translate-y-0.5 group">
+          <div class="text-3xl mb-2">🛒</div>
+          <div class="font-bold text-sm mb-1 group-hover:text-sz-accent transition-colors">NavBot.hu</div>
+          <p class="text-xs text-sz-text-dim leading-relaxed">
+            Webshop · NAV-számla · helpdesk · űrlap-handler — minden ami magyar SMB-nek kell.
+          </p>
+        </a>
+        <a href="/" class="sz-card border-2 border-sz-accent bg-sz-accent-l/30">
+          <div class="text-3xl mb-2">✎</div>
+          <div class="font-bold text-sm mb-1 text-sz-accent">Szövegelek.hu</div>
+          <p class="text-xs text-sz-text-dim leading-relaxed">
+            <strong>Itt vagy.</strong> Magyar AI-copywriter — termékleírás, hirdetés, e-mail.
+          </p>
+        </a>
+        <a href="https://promnet.hu" class="sz-card hover:border-sz-accent transition-all hover:-translate-y-0.5 group">
+          <div class="text-3xl mb-2">☁️</div>
+          <div class="font-bold text-sm mb-1 group-hover:text-sz-accent transition-colors">PromNET.hu</div>
+          <p class="text-xs text-sz-text-dim leading-relaxed">
+            Magyar Cloudflare-rátét: portfolio-hosting, edge-app, Workers AI fejlesztőknek.
+          </p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  {/* ZÁRÓ CTA */}
+  <section class="max-w-3xl mx-auto px-4 py-14 text-center">
+    <h2 class="text-2xl md:text-3xl font-bold mb-3 text-sz-text">
+      Próbáld ki <span class="serif italic text-sz-accent">most</span>, regisztráció nélkül.
+    </h2>
+    <p class="text-sm text-sz-text-mid mb-6 max-w-xl mx-auto">
+      20 generálás IP-alapon, semmihez se kell e-mail. Tetszik? Akkor regisztrálsz.
+    </p>
+    <a href="/probald" class="sz-btn-primary text-base px-6 py-3 shadow-md">
+      Most próbálom →
+    </a>
+  </section>
+</Base>

@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root { color-scheme: light; }
+  body {
+    background: theme('colors.sz-bg');
+    color: theme('colors.sz-text');
+    font-feature-settings: "ss01" 1, "cv01" 1;
+  }
+  ::selection {
+    background: theme('colors.sz-accent');
+    color: white;
+  }
+}
+
+@layer components {
+  .sz-btn-primary {
+    @apply inline-flex items-center justify-center px-5 py-2.5 bg-sz-accent text-white font-semibold rounded-lg text-sm hover:bg-sz-accent-h transition-all shadow-sm hover:shadow-md;
+  }
+  .sz-btn-secondary {
+    @apply inline-flex items-center justify-center px-5 py-2.5 bg-white border border-sz-border-2 text-sz-text font-medium rounded-lg text-sm hover:border-sz-accent hover:text-sz-accent transition-colors;
+  }
+  .sz-btn-ghost {
+    @apply inline-flex items-center justify-center px-3 py-2 text-sz-accent font-medium rounded-lg text-sm hover:bg-sz-accent-l transition-colors;
+  }
+  .sz-card {
+    @apply bg-white border border-sz-border rounded-2xl p-6 shadow-sm;
+  }
+}
+
+/* Animációk (közös NavBot-utility-mintára) */
+@keyframes sz-fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes sz-pulse-soft {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.6; }
+}
+@keyframes sz-typing {
+  0%   { width: 0; }
+  100% { width: 100%; }
+}
+
+.sz-fade-up   { animation: sz-fade-up 0.5s ease-out both; }
+.sz-fade-up-1 { animation: sz-fade-up 0.5s ease-out 0.1s both; }
+.sz-fade-up-2 { animation: sz-fade-up 0.5s ease-out 0.2s both; }
+.sz-fade-up-3 { animation: sz-fade-up 0.5s ease-out 0.3s both; }
+.sz-pulse-soft{ animation: sz-pulse-soft 2s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sz-fade-up, .sz-fade-up-1, .sz-fade-up-2, .sz-fade-up-3, .sz-pulse-soft {
+    animation: none;
+  }
+}
