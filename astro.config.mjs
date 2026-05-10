@@ -4,7 +4,8 @@ import tailwind from '@astrojs/tailwind';
 import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
-  site: 'https://szovegelek.hu',
+  // szovegelek.hu foglalt — promnet.hu aldomainen futunk
+  site: 'https://szovegelek.promnet.hu',
   output: 'server',
   adapter: cloudflare({
     platformProxy: { enabled: true },

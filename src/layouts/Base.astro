@@ -12,7 +12,7 @@ const {
 } = Astro.props;
 
 const fullTitle = title.includes('Szövegelek') ? title : `${title} · Szövegelek`;
-const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://szovegelek.hu').href;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://szovegelek.promnet.hu').href;
 ---
 
 <!doctype html>
@@ -41,7 +41,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://szovegelek.
       <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
         <a href="/" class="flex items-center gap-2 font-bold text-lg text-sz-text">
           <span class="inline-flex items-center justify-center w-9 h-9 bg-sz-accent text-white rounded-xl font-bold shadow-sm text-base" aria-hidden="true">✎</span>
-          <span>Szövegelek<span class="font-normal text-sz-text-dim text-xs ml-0.5">.hu</span></span>
+          <span>Szövegelek<span class="font-normal text-sz-text-dim text-xs ml-0.5">.promnet.hu</span></span>
         </a>
         <nav class="hidden md:flex items-center gap-5 text-sm">
           <a href="/#hogyan" class="text-sz-text-mid hover:text-sz-accent transition-colors">Hogyan működik</a>
@@ -64,11 +64,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://szovegelek.
           <div>
             <div class="flex items-center gap-2 font-bold text-base text-sz-text mb-2">
               <span class="inline-flex items-center justify-center w-7 h-7 bg-sz-accent text-white rounded-lg text-sm" aria-hidden="true">✎</span>
-              <span>Szövegelek.hu</span>
+              <span>Szövegelek<span class="text-sz-text-dim font-normal text-xs">.promnet.hu</span></span>
             </div>
             <p class="text-xs text-sz-text-dim max-w-md leading-relaxed">
               Magyar AI-copywriter KKV-knek. Termékleírás, hirdetés-szöveg, e-mail-vázlat
-              — magyar nyelven, percek alatt.
+              — magyar nyelven, percek alatt. A PromNET-család tagja.
             </p>
           </div>
           <div class="text-xs text-sz-text-dim space-y-1">
@@ -82,7 +82,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://szovegelek.
           </div>
         </div>
         <div class="border-t border-sz-border mt-6 pt-4 flex flex-wrap items-center justify-between gap-3 text-[11px] text-sz-text-muted">
-          <span>© 2026 Szövegelek.hu — Polyák Csaba e.v.</span>
+          <span>© 2026 Szövegelek (PromNET-család) — Polyák Csaba e.v.</span>
           <span class="font-mono">Magyar fejlesztő · CF-Pages · Workers AI</span>
         </div>
       </div>
