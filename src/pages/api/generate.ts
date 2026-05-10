@@ -1,11 +1,17 @@
 // POST /api/generate — magyar copy-generálás Workers AI Llama-3.3-mal.
 // Body: { template, topic, tone, audience? }
-// Visszatérés: { ok, versions: [str, str, str], quota_remaining? }
+// Visszatérés: { ok, versions: [str, str, str], quota_remaining?, tier? }
 //
-// Anonim IP-quota: 20 / hó / IP. Magasabb cap regisztrált usereknek
-// (közös D1 — szovegelek_anon_quota tábla a hónapos counter-hez).
+// Quota-rendszer:
+//   - Anonim user: IP-alapú, 20 / hó / IP (szovegelek_anon_quota)
+//   - Belépett user: cloud-csomag-tier szerint (sz_session cookie)
+//       free  →   50 / hó
+//       start →  500 / hó
+//       pro   → 5000 / hó (fair-use)
+//     User-quota-tracker: szovegelek_user_quota tábla (user_id, month_key)
 
 import type { APIContext } from 'astro';
+import { getCurrentUser, getDB } from '../../lib/auth';
 
 interface AIBinding {
   run(model: string, params: { messages?: Array<{ role: string; content: string }>; max_tokens?: number; temperature?: number }): Promise<{ response?: string }>;
@@ -25,6 +31,18 @@ export const prerender = false;
 
 const MODEL = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
 const FREE_QUOTA_PER_MONTH = 20;
+const TIER_QUOTAS: Record<string, number> = {
+  free: 50,
+  start: 500,
+  pro: 5000,
+};
+
+function planToTier(planId: string | null | undefined): 'free' | 'start' | 'pro' {
+  const p = (planId ?? 'free').toLowerCase();
+  if (p.includes('pro')) return 'pro';
+  if (p.includes('start')) return 'start';
+  return 'free';
+}
 
 const TEMPLATE_PROMPTS: Record<string, string> = {
   product:   `Te magyar copywriter vagy magyar webshopnak. Generálj 3 darab termékleírás-verziót: 1) RÖVID (40-60 szó, hooks az érzelemre), 2) KÖZEPES (80-120 szó, value-prop + USP), 3) HOSSZÚ (150-200 szó, storytelling). Magyar nyelven, természetes mondatokkal, NEM ChatGPT-stílus. Kerüld a "fedezze fel", "izgalmas utazás" típusú giccses sablon-szövegeket. Kerüld az AI-frázisokat. Output: EXACTLY 3 verzió "---" elválasztással, semmi más szöveg.`,
@@ -70,28 +88,64 @@ export async function POST(context: APIContext): Promise<Response> {
   if (topic.length < 5) return jerr(400, 'A téma túl rövid (min 5 char).');
   if (topic.length > 500) return jerr(400, 'A téma túl hosszú (max 500 char).');
 
-  // IP-alapú anonim-quota
-  const ip = context.request.headers.get('cf-connecting-ip')
-          ?? context.request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-          ?? 'unknown';
+  // Quota-rendszer: ha be van lépve, user-tier; egyébként IP-anon.
   const monthKey = (() => {
     const d = new Date();
     return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
   })();
 
   let quotaRemaining: number | undefined;
-  if (env.DB) {
+  let tier: 'anon' | 'free' | 'start' | 'pro' = 'anon';
+  let isUserQuota = false;
+  let userId: string | null = null;
+  let ip = 'unknown';
+
+  const dbForAuth = getDB(context);
+  const user = dbForAuth ? await getCurrentUser(context).catch(() => null) : null;
+
+  if (user && env.DB) {
+    // Belépett user — cloud-tier kvóta a `subscriptions.plan_id`-ból
+    userId = user.id;
+    isUserQuota = true;
+    try {
+      const sub = await env.DB.prepare(
+        "SELECT plan_id FROM subscriptions WHERE user_id = ? AND status = 'active' " +
+        "ORDER BY current_period_end DESC LIMIT 1",
+      ).bind(user.id).first<{ plan_id: string }>();
+      tier = planToTier(sub?.plan_id);
+    } catch { tier = 'free'; }
+
+    const limit = TIER_QUOTAS[tier];
     try {
       const row = await env.DB.prepare(
-        'SELECT used FROM szovegelek_anon_quota WHERE ip = ? AND month_key = ?',
-      ).bind(ip, monthKey).first<{ used: number }>();
+        'SELECT used FROM szovegelek_user_quota WHERE user_id = ? AND month_key = ?',
+      ).bind(user.id, monthKey).first<{ used: number }>();
       const used = row?.used ?? 0;
-      if (used >= FREE_QUOTA_PER_MONTH) {
-        return jerr(429, `Havi 20 ingyen generálás elfogyott erről az IP-ről. Regisztrálj +30-ért, vagy várd a hónap végét.`);
+      if (used >= limit) {
+        return jerr(429,
+          `Havi ${limit} generálás elfogyott (${tier} tier). ` +
+          `Magasabb tier: promnet.hu/app/szamlazas.`);
       }
-      quotaRemaining = FREE_QUOTA_PER_MONTH - used - 1;
-    } catch {
-      // tábla még nem létezik → folytatjuk fallback-kel (no-quota)
+      quotaRemaining = limit - used - 1;
+    } catch { /* tábla nem létezik → no-quota fallback */ }
+  } else {
+    // Anonim user — IP-alapú
+    ip = context.request.headers.get('cf-connecting-ip')
+      ?? context.request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+      ?? 'unknown';
+    if (env.DB) {
+      try {
+        const row = await env.DB.prepare(
+          'SELECT used FROM szovegelek_anon_quota WHERE ip = ? AND month_key = ?',
+        ).bind(ip, monthKey).first<{ used: number }>();
+        const used = row?.used ?? 0;
+        if (used >= FREE_QUOTA_PER_MONTH) {
+          return jerr(429,
+            `Havi ${FREE_QUOTA_PER_MONTH} ingyen generálás elfogyott erről az IP-ről. ` +
+            `Belépés után +30 azonnal.`);
+        }
+        quotaRemaining = FREE_QUOTA_PER_MONTH - used - 1;
+      } catch { /* skip */ }
     }
   }
 
@@ -127,10 +181,17 @@ export async function POST(context: APIContext): Promise<Response> {
   // Counter increment (best-effort)
   if (env.DB && quotaRemaining !== undefined) {
     try {
-      await env.DB.prepare(
-        'INSERT INTO szovegelek_anon_quota (ip, month_key, used) VALUES (?, ?, 1) ' +
-        'ON CONFLICT (ip, month_key) DO UPDATE SET used = used + 1',
-      ).bind(ip, monthKey).run();
+      if (isUserQuota && userId) {
+        await env.DB.prepare(
+          'INSERT INTO szovegelek_user_quota (user_id, month_key, used) VALUES (?, ?, 1) ' +
+          'ON CONFLICT (user_id, month_key) DO UPDATE SET used = used + 1',
+        ).bind(userId, monthKey).run();
+      } else {
+        await env.DB.prepare(
+          'INSERT INTO szovegelek_anon_quota (ip, month_key, used) VALUES (?, ?, 1) ' +
+          'ON CONFLICT (ip, month_key) DO UPDATE SET used = used + 1',
+        ).bind(ip, monthKey).run();
+      }
     } catch { /* skip */ }
   }
 
@@ -138,6 +199,8 @@ export async function POST(context: APIContext): Promise<Response> {
     ok: true,
     versions,
     quota_remaining: quotaRemaining,
+    tier,
+    is_logged_in: isUserQuota,
   }), { headers: { 'Content-Type': 'application/json' } });
 }
 

@@ -1,5 +1,10 @@
 ---
 import Base from '../layouts/Base.astro';
+import { getCurrentUser } from '../lib/auth';
+
+const user = await getCurrentUser(Astro).catch(() => null);
+const PN_LOGIN_BRIDGE = 'https://promnet.hu/app/belepes?next='
+  + encodeURIComponent('/api/auth/sso/sz-bridge');
 
 const TEMPLATES = [
   { id: 'product',  emoji: '🛍',  name: 'Termékleírás',         desc: 'Webshop-termékhez 3 verziót generál (rövid / közepes / hosszú).' },
@@ -24,9 +29,26 @@ const TEMPLATES = [
         Válaszd a sablont, töltsd ki a 2 mezőt, kattints. <strong class="text-sz-text">5 mp alatt 3 verzió.</strong>
       </p>
       <p class="text-xs text-sz-text-muted mt-2 font-mono" id="quota-info">
-        20 ingyen generálás / IP / hó · regisztrációval +30 azonnal
+        {user
+          ? '50 / hó (Free) — magasabb tier-rel több (Start: 500, Pro: 5000)'
+          : '20 ingyen generálás / IP / hó · regisztrálva +30 azonnal'}
       </p>
     </header>
+
+    {!user && (
+      <div class="mb-6 sz-card border-2 border-sz-accent/30 bg-sz-accent-l/30 sz-fade-up-1">
+        <div class="flex items-start gap-3">
+          <span class="text-2xl shrink-0">💎</span>
+          <div class="flex-1 text-sm">
+            <strong class="text-sz-text">Belépés után 50/hó (Free) helyett 20/IP.</strong>
+            <span class="text-sz-text-mid"> Plus brand-hang mentés, bulk-CSV-export, és magasabb tier-rel akár 5000 generálás.</span>
+            <a href={PN_LOGIN_BRIDGE} class="ml-1 text-sz-accent font-semibold hover:underline">
+              Belépés vagy regisztráció →
+            </a>
+          </div>
+        </div>
+      </div>
+    )}
 
     {/* TEMPLATE-választó */}
     <div class="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-2 mb-6 sz-fade-up-1">

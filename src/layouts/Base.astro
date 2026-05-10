@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { getCurrentUser } from '../lib/auth';
 
 interface Props {
   title: string;
@@ -8,11 +9,19 @@ interface Props {
 
 const {
   title,
-  description = 'Szövegelek.hu — magyar AI-copywriter KKV-knek. Termékleírás, hirdetés, e-mail, FB-poszt — szerves magyar nyelven, percek alatt.',
+  description = 'Szövegelek — magyar AI-copywriter KKV-knek. Termékleírás, hirdetés, e-mail, FB-poszt — szerves magyar nyelven, percek alatt.',
 } = Astro.props;
 
 const fullTitle = title.includes('Szövegelek') ? title : `${title} · Szövegelek`;
 const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://szovegelek.promnet.hu').href;
+
+// Cross-brand auth: ha PromNET-en bejelentkezve volt és handoff-bridge-el
+// jött, sz_session cookie van. Itt csak DISPLAY-célra kell.
+const user = await getCurrentUser(Astro).catch(() => null);
+
+// PromNET login + bridge URL — Belépés gomb erre megy.
+const PN_LOGIN_BRIDGE = 'https://promnet.hu/app/belepes?next='
+  + encodeURIComponent('/api/auth/sso/sz-bridge');
 ---
 
 <!doctype html>
@@ -48,9 +57,28 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://szovegelek.
           <a href="/#sablonok" class="text-sz-text-mid hover:text-sz-accent transition-colors">Sablonok</a>
           <a href="/#arak" class="text-sz-text-mid hover:text-sz-accent transition-colors">Árak</a>
         </nav>
-        <a href="/probald" class="sz-btn-primary text-sm">
-          Próbáld ki ingyen →
-        </a>
+        <div class="flex items-center gap-2">
+          {user ? (
+            <>
+              <span class="hidden sm:flex items-center gap-1.5 text-xs text-sz-text-mid bg-sz-bg-2 border border-sz-border px-2.5 py-1.5 rounded-full">
+                <span class="w-1.5 h-1.5 rounded-full bg-sz-success sz-pulse-soft"></span>
+                {user.display_name ?? user.email.split('@')[0]}
+              </span>
+              <a href="/probald" class="sz-btn-primary text-sm">
+                Generálj →
+              </a>
+            </>
+          ) : (
+            <>
+              <a href={PN_LOGIN_BRIDGE} class="hidden sm:inline-flex text-sm text-sz-text-mid hover:text-sz-accent px-3 py-2 transition-colors">
+                Belépés
+              </a>
+              <a href="/probald" class="sz-btn-primary text-sm">
+                Próbáld ingyen →
+              </a>
+            </>
+          )}
+        </div>
       </div>
     </header>
 
