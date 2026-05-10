@@ -1,0 +1,211 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection, getEntry } from 'astro:content';
+import { TOOLS } from '../../data/tools';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts
+    .filter((p) => !p.data.draft)
+    .map((post) => ({ params: { slug: post.slug }, props: { post } }));
+}
+export const prerender = true;
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+
+const fmtDate = (iso: string) =>
+  new Date(iso).toLocaleDateString('hu-HU', { year: 'numeric', month: 'long', day: 'numeric' });
+
+// Related tools (a post.data.relatedTools-ből)
+const relatedTools = post.data.relatedTools
+  .map((slug) => TOOLS.find((t) => t.slug === slug))
+  .filter((t): t is NonNullable<typeof t> => !!t);
+
+// Schema.org BlogPosting
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.data.title,
+  description: post.data.description,
+  datePublished: post.data.publishedAt,
+  dateModified: post.data.updatedAt ?? post.data.publishedAt,
+  author: { '@type': 'Person', name: post.data.author },
+  publisher: {
+    '@type': 'Organization',
+    name: 'Szövegelek',
+    logo: { '@type': 'ImageObject', url: 'https://szovegelek.promnet.hu/favicon.svg' },
+  },
+  mainEntityOfPage: {
+    '@type': 'WebPage',
+    '@id': `https://szovegelek.promnet.hu/blog/${post.slug}`,
+  },
+  inLanguage: 'hu-HU',
+  keywords: post.data.tags.join(', '),
+};
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Szövegelek', item: 'https://szovegelek.promnet.hu' },
+    { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://szovegelek.promnet.hu/blog' },
+    { '@type': 'ListItem', position: 3, name: post.data.title, item: `https://szovegelek.promnet.hu/blog/${post.slug}` },
+  ],
+};
+
+// Egyéb posztok (related — bármelyik 3 másik)
+const allPosts = (await getCollection('blog'))
+  .filter((p) => !p.data.draft && p.slug !== post.slug)
+  .sort((a, b) => b.data.publishedAt.localeCompare(a.data.publishedAt))
+  .slice(0, 3);
+---
+
+<Base
+  title={post.data.title}
+  description={post.data.description}
+  articleSchema={articleSchema}
+>
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(articleSchema)} />
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
+
+  <div class="max-w-3xl mx-auto px-4 pt-4">
+    <nav class="text-xs text-sz-text-muted font-mono" aria-label="Breadcrumb">
+      <a href="/" class="hover:text-sz-accent">Szövegelek</a>
+      <span class="mx-1.5">·</span>
+      <a href="/blog" class="hover:text-sz-accent">Blog</a>
+      <span class="mx-1.5">·</span>
+      <span class="text-sz-text-mid truncate inline-block max-w-xs align-bottom">{post.data.title}</span>
+    </nav>
+  </div>
+
+  <article class="max-w-3xl mx-auto px-4 py-10">
+    <header class="mb-8 sz-fade-up">
+      <div class="flex items-baseline gap-3 mb-3 flex-wrap">
+        <time datetime={post.data.publishedAt}
+              class="text-[10px] font-mono uppercase tracking-wider text-sz-text-muted">
+          {fmtDate(post.data.publishedAt)}
+        </time>
+        <span class="text-[10px] font-mono text-sz-text-muted">·</span>
+        <span class="text-[10px] font-mono text-sz-text-muted">{post.data.readingMinutes} perc olvasás</span>
+        <span class="text-[10px] font-mono text-sz-text-muted">·</span>
+        <span class="text-[10px] font-mono text-sz-text-muted">{post.data.author}</span>
+      </div>
+      <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-sz-text leading-tight">
+        {post.data.title}
+      </h1>
+      <p class="text-base text-sz-text-mid mt-3 leading-relaxed">
+        {post.data.description}
+      </p>
+      {post.data.tags.length > 0 && (
+        <div class="flex gap-1.5 flex-wrap mt-4">
+          {post.data.tags.map((t) => (
+            <span class="text-[10px] font-mono px-2 py-0.5 bg-sz-accent-l text-sz-accent rounded-full">
+              #{t}
+            </span>
+          ))}
+        </div>
+      )}
+    </header>
+
+    <div class="prose prose-sz max-w-none">
+      <Content />
+    </div>
+  </article>
+
+  {/* Related tools */}
+  {relatedTools.length > 0 && (
+    <section class="bg-sz-bg-2 border-y border-sz-border">
+      <div class="max-w-3xl mx-auto px-4 py-10">
+        <h2 class="font-bold text-lg mb-4 text-sz-text">Kapcsolódó AI-eszközök</h2>
+        <div class="grid sm:grid-cols-3 gap-3">
+          {relatedTools.map((t) => (
+            <a href={`/eszkozok/${t.slug}`} class="sz-card hover:border-sz-accent transition-all hover:-translate-y-0.5 group">
+              <div class="text-2xl mb-2 group-hover:scale-110 transition-transform inline-block">{t.emoji}</div>
+              <h3 class="font-bold text-sm mb-1 text-sz-text group-hover:text-sz-accent transition-colors">
+                {t.title}
+              </h3>
+              <span class="text-xs text-sz-accent font-mono">Próbáld →</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {/* More from blog */}
+  {allPosts.length > 0 && (
+    <section class="max-w-3xl mx-auto px-4 py-10">
+      <h2 class="font-bold text-lg mb-4 text-sz-text">Más posztok</h2>
+      <div class="space-y-3">
+        {allPosts.map((p) => (
+          <a href={`/blog/${p.slug}`} class="sz-card hover:border-sz-accent transition-all hover:-translate-y-0.5 group block">
+            <h3 class="font-bold text-sm mb-1 text-sz-text group-hover:text-sz-accent transition-colors">
+              {p.data.title}
+            </h3>
+            <p class="text-xs text-sz-text-mid leading-relaxed">{p.data.description}</p>
+          </a>
+        ))}
+      </div>
+      <div class="text-center mt-6">
+        <a href="/blog" class="text-sm text-sz-accent font-mono hover:underline">
+          Mind a posztok →
+        </a>
+      </div>
+    </section>
+  )}
+</Base>
+
+<style is:global>
+  .prose-sz h2 {
+    @apply text-2xl font-bold text-sz-text mt-8 mb-3;
+  }
+  .prose-sz h3 {
+    @apply text-lg font-bold text-sz-text mt-6 mb-2;
+  }
+  .prose-sz p {
+    @apply text-base text-sz-text-mid leading-relaxed mb-4;
+  }
+  .prose-sz a {
+    @apply text-sz-accent hover:underline;
+  }
+  .prose-sz strong {
+    @apply text-sz-text font-semibold;
+  }
+  .prose-sz em {
+    @apply text-sz-text-mid italic;
+  }
+  .prose-sz blockquote {
+    @apply border-l-4 border-sz-accent bg-sz-bg-2 pl-4 py-2 my-4 italic text-sz-text-mid;
+  }
+  .prose-sz code {
+    @apply bg-sz-bg-2 px-1.5 py-0.5 rounded text-sm font-mono text-sz-accent border border-sz-border;
+  }
+  .prose-sz pre {
+    @apply bg-sz-bg-2 border border-sz-border rounded-lg p-4 overflow-x-auto my-4;
+  }
+  .prose-sz pre code {
+    @apply bg-transparent border-0 p-0 text-sz-text-mid;
+  }
+  .prose-sz ul {
+    @apply list-disc pl-6 mb-4 space-y-1.5 text-base text-sz-text-mid;
+  }
+  .prose-sz ol {
+    @apply list-decimal pl-6 mb-4 space-y-1.5 text-base text-sz-text-mid;
+  }
+  .prose-sz li {
+    @apply leading-relaxed;
+  }
+  .prose-sz table {
+    @apply w-full border-collapse my-4;
+  }
+  .prose-sz th, .prose-sz td {
+    @apply border border-sz-border px-3 py-2 text-sm;
+  }
+  .prose-sz th {
+    @apply bg-sz-bg-2 font-semibold text-sz-text;
+  }
+  .prose-sz hr {
+    @apply border-sz-border my-8;
+  }
+</style>
