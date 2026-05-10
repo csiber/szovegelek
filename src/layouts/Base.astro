@@ -29,6 +29,11 @@ const user = await getCurrentUser(Astro).catch(() => null);
 const PN_LOGIN_BRIDGE = 'https://promnet.hu/app/belepes?next='
   + encodeURIComponent('/api/auth/sso/sz-bridge');
 
+// Google Search Console verification token (runtime env-var)
+interface RuntimeEnvShape { GOOGLE_SITE_VERIFICATION?: string }
+const runtimeEnv = (Astro.locals as { runtime?: { env: RuntimeEnvShape } }).runtime?.env;
+const googleSiteVerification = runtimeEnv?.GOOGLE_SITE_VERIFICATION ?? '';
+
 // Schema.org JSON-LD — SoftwareApplication + Organization
 const websiteSchema = {
   '@context': 'https://schema.org',
@@ -103,6 +108,11 @@ const softwareSchema = {
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/favicon.svg" />
     <link rel="mask-icon" href="/favicon.svg" color="#e44a6b" />
+
+    {/* Google Search Console verification (runtime env-var GOOGLE_SITE_VERIFICATION) */}
+    {googleSiteVerification && (
+      <meta name="google-site-verification" content={googleSiteVerification} />
+    )}
 
     {/* Google Fonts — Plus Jakarta Sans + Lora */}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
