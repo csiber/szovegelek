@@ -1,0 +1,32 @@
+---
+// Logo komponens — kicsi (header) és nagy (hero) változat.
+interface Props {
+  size?: 'sm' | 'md' | 'lg';
+  withText?: boolean;
+}
+const { size = 'md', withText = true } = Astro.props as Props;
+const dim = size === 'sm' ? 28 : size === 'lg' ? 56 : 36;
+const txtSize = size === 'sm' ? 'text-base' : size === 'lg' ? 'text-3xl' : 'text-lg';
+const tldSize = size === 'sm' ? 'text-[10px]' : size === 'lg' ? 'text-sm' : 'text-xs';
+---
+
+<a href="/" class={`inline-flex items-center gap-2 font-bold text-sz-text ${txtSize} no-underline`}>
+  <svg width={dim} height={dim} viewBox="0 0 32 32" class="shrink-0" aria-label="Szövegelek logó">
+    <defs>
+      <linearGradient id={`logo-grad-${size}`} x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#e44a6b"/>
+        <stop offset="100%" stop-color="#c8395a"/>
+      </linearGradient>
+    </defs>
+    <rect width="32" height="32" rx="8" fill={`url(#logo-grad-${size})`}/>
+    <path d="M11 9 Q9 9 9 11 Q9 13 11 13 L17 13 Q19 13 19 15 Q19 17 17 17 L11 17 Q9 17 9 19 Q9 21 11 21 L19 21"
+          fill="none" stroke="white" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="22" cy="10" r="1.6" fill="#fde7eb"/>
+    <circle cx="22" cy="10" r="0.7" fill="white"/>
+  </svg>
+  {withText && (
+    <span>
+      Szövegelek<span class={`font-normal text-sz-text-dim ${tldSize} ml-0.5`}>.promnet.hu</span>
+    </span>
+  )}
+</a>

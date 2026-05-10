@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://szovegelek.promnet.hu/sitemap-index.xml
