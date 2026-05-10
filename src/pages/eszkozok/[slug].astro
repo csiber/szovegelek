@@ -1,0 +1,209 @@
+---
+import Base from '../../layouts/Base.astro';
+import { TOOLS, getTool } from '../../data/tools';
+
+// SSR (Base.astro auth-lookup-ot fut, ezért nem prerender).
+// CF Pages-edge gyors-render, plus Google a HTML-választ indexeli.
+export const prerender = false;
+
+const { slug } = Astro.params;
+const tool = getTool(slug as string);
+if (!tool) return Astro.redirect('/eszkozok');
+
+// Cross-link: 3 másik tool ajánlása (semantic-related — ugyanazon kategóriában)
+const RELATED: Record<string, string[]> = {
+  product: ['fb_ad', 'instagram', 'gads'],            // commerce-cluster
+  fb_ad: ['gads', 'instagram', 'product'],            // ad-cluster
+  email: ['linkedin', 'press', 'blog'],                // business-comm-cluster
+  instagram: ['fb_ad', 'product', 'blog'],             // social-cluster
+  blog: ['press', 'linkedin', 'email'],                // long-form-cluster
+  gads: ['fb_ad', 'product', 'instagram'],             // ad-cluster
+  aszf: ['email', 'press', 'linkedin'],                // legal-comm-cluster
+  linkedin: ['blog', 'press', 'email'],                // pro-comm-cluster
+  press: ['blog', 'linkedin', 'email'],                // long-form-cluster
+};
+const relatedTemplateIds = RELATED[tool.templateId] ?? [];
+const relatedTools = relatedTemplateIds
+  .map((tid) => TOOLS.find((t) => t.templateId === tid))
+  .filter((t): t is NonNullable<typeof t> => !!t);
+
+// Schema.org WebApplication subtype + FAQPage
+const appSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: tool.title,
+  description: tool.metaDesc,
+  applicationCategory: 'BusinessApplication',
+  operatingSystem: 'Web',
+  inLanguage: 'hu-HU',
+  url: `https://szovegelek.promnet.hu/eszkozok/${tool.slug}`,
+  offers: {
+    '@type': 'Offer',
+    price: 0,
+    priceCurrency: 'HUF',
+    description: '20 ingyen generálás / hó (Free)',
+  },
+};
+
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: tool.faqs.map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: f.a,
+    },
+  })),
+};
+
+// Breadcrumb-schema
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Szövegelek', item: 'https://szovegelek.promnet.hu' },
+    { '@type': 'ListItem', position: 2, name: 'Eszközök', item: 'https://szovegelek.promnet.hu/eszkozok' },
+    { '@type': 'ListItem', position: 3, name: tool.title, item: `https://szovegelek.promnet.hu/eszkozok/${tool.slug}` },
+  ],
+};
+---
+
+<Base
+  title={tool.metaTitle}
+  description={tool.metaDesc}
+>
+  {/* Schema.org JSON-LD külön — App + FAQ + Breadcrumb */}
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(appSchema)} />
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
+
+  {/* Breadcrumb */}
+  <div class="max-w-5xl mx-auto px-4 pt-4">
+    <nav class="text-xs text-sz-text-muted font-mono" aria-label="Breadcrumb">
+      <a href="/" class="hover:text-sz-accent">Szövegelek</a>
+      <span class="mx-1.5">·</span>
+      <a href="/eszkozok" class="hover:text-sz-accent">Eszközök</a>
+      <span class="mx-1.5">·</span>
+      <span class="text-sz-text-mid">{tool.title}</span>
+    </nav>
+  </div>
+
+  {/* HERO */}
+  <section class="bg-gradient-to-b from-sz-bg-3 to-sz-bg">
+    <div class="max-w-4xl mx-auto px-4 pt-10 pb-12 text-center">
+      <div class="text-6xl mb-4 sz-fade-up">{tool.emoji}</div>
+      <h1 class="text-3xl md:text-5xl font-bold tracking-tight mb-4 text-sz-text leading-tight sz-fade-up-1">
+        {tool.h1}
+      </h1>
+      <p class="text-lg text-sz-text-mid max-w-2xl mx-auto mb-7 leading-relaxed sz-fade-up-2">
+        {tool.lead}
+      </p>
+      <div class="sz-fade-up-3 flex items-center justify-center gap-3 flex-wrap">
+        <a href={`/probald?template=${tool.templateId}`} class="sz-btn-primary text-base px-6 py-3 shadow-md">
+          Most kipróbálom →
+        </a>
+        <a href="#pelda" class="sz-btn-secondary text-base px-6 py-3">
+          Mutass példát
+        </a>
+      </div>
+      <p class="text-xs text-sz-text-muted mt-4">
+        20 ingyen / hó · Bankkártya nélkül · Magyar Ft-számla
+      </p>
+    </div>
+  </section>
+
+  {/* BENEFITS */}
+  <section class="max-w-5xl mx-auto px-4 py-12">
+    <div class="grid md:grid-cols-3 gap-4">
+      {tool.benefits.map((b) => (
+        <div class="sz-card">
+          <div class="text-3xl mb-3">{b.emoji}</div>
+          <h3 class="font-bold text-base mb-1.5">{b.title}</h3>
+          <p class="text-sm text-sz-text-mid leading-relaxed">{b.desc}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  {/* LIVE PÉLDA */}
+  <section id="pelda" class="bg-sz-bg-2 border-y border-sz-border">
+    <div class="max-w-3xl mx-auto px-4 py-12">
+      <div class="text-center mb-8">
+        <p class="font-mono text-xs text-sz-accent uppercase tracking-wider mb-2">live példa</p>
+        <h2 class="text-2xl md:text-3xl font-bold text-sz-text">Így néz ki a kimenet</h2>
+      </div>
+      <div class="space-y-4">
+        <div class="sz-card">
+          <div class="text-[10px] font-mono uppercase tracking-wider text-sz-text-muted mb-2">📥 BEMENET (amit te adsz)</div>
+          <p class="text-sm text-sz-text-mid font-mono">{tool.exampleInput}</p>
+        </div>
+        <div class="sz-card border-l-4 border-sz-accent">
+          <div class="text-[10px] font-mono uppercase tracking-wider text-sz-accent mb-2">📤 KIMENET (amit Promi ír)</div>
+          <p class="text-sm text-sz-text leading-relaxed serif italic whitespace-pre-wrap">"{tool.exampleOutput}"</p>
+        </div>
+      </div>
+      <div class="text-center mt-8">
+        <a href={`/probald?template=${tool.templateId}`} class="sz-btn-primary px-6 py-3">
+          Sajátoddal kipróbálom →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  {/* FAQ */}
+  <section class="max-w-3xl mx-auto px-4 py-12">
+    <div class="text-center mb-8">
+      <p class="font-mono text-xs text-sz-accent uppercase tracking-wider mb-2">gyakori kérdések</p>
+      <h2 class="text-2xl md:text-3xl font-bold text-sz-text">Mit tudni kell?</h2>
+    </div>
+    <div class="space-y-3">
+      {tool.faqs.map((f) => (
+        <details class="sz-card group">
+          <summary class="cursor-pointer flex items-start gap-3">
+            <span class="text-sz-accent font-bold text-lg mt-0.5 transition-transform group-open:rotate-45">+</span>
+            <span class="font-bold text-sz-text flex-1">{f.q}</span>
+          </summary>
+          <p class="text-sm text-sz-text-mid leading-relaxed mt-3 pl-7">{f.a}</p>
+        </details>
+      ))}
+    </div>
+  </section>
+
+  {/* RELATED tools — internal-link cluster (SEO-juice) */}
+  {relatedTools.length > 0 && (
+    <section class="bg-sz-bg-2 border-y border-sz-border">
+      <div class="max-w-5xl mx-auto px-4 py-12">
+        <div class="text-center mb-8">
+          <p class="font-mono text-xs text-sz-accent uppercase tracking-wider mb-2">tovább</p>
+          <h2 class="text-2xl font-bold text-sz-text">Hasonló sablonok</h2>
+        </div>
+        <div class="grid md:grid-cols-3 gap-4">
+          {relatedTools.map((t) => (
+            <a href={`/eszkozok/${t.slug}`} class="sz-card hover:border-sz-accent transition-all hover:-translate-y-0.5 group">
+              <div class="text-3xl mb-2 group-hover:scale-110 transition-transform inline-block">{t.emoji}</div>
+              <h3 class="font-bold text-sm mb-1 text-sz-text group-hover:text-sz-accent transition-colors">
+                {t.title}
+              </h3>
+              <p class="text-xs text-sz-text-mid leading-relaxed">{t.lead.slice(0, 80)}…</p>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  {/* ZÁRÓ CTA */}
+  <section class="max-w-3xl mx-auto px-4 py-14 text-center">
+    <h2 class="text-2xl md:text-3xl font-bold mb-3 text-sz-text">
+      Készen állsz <span class="serif italic text-sz-accent">{tool.title.toLowerCase()}-re</span>?
+    </h2>
+    <p class="text-sm text-sz-text-mid mb-6 max-w-xl mx-auto">
+      20 ingyen generálás IP-alapon, regisztráció nélkül.
+    </p>
+    <a href={`/probald?template=${tool.templateId}`} class="sz-btn-primary text-base px-6 py-3 shadow-md">
+      Kezdjük most →
+    </a>
+  </section>
+</Base>

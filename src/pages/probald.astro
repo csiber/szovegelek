@@ -128,6 +128,18 @@ const TEMPLATES = [
 
     let activeTemplate = null;
     const btns = document.querySelectorAll('[data-template]');
+
+    // Pre-select template URL-param-ból (eszkozok/<slug>-ról jövő deep-link)
+    (function() {
+      const urlTpl = new URLSearchParams(window.location.search).get('template');
+      if (urlTpl && TEMPLATE_META[urlTpl]) {
+        const target = document.querySelector(`[data-template="${urlTpl}"]`);
+        if (target) {
+          (target as HTMLElement).click();
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    })();
     const genBtn = document.getElementById('gen-btn');
     const activeBox = document.getElementById('active-template');
     const activeName = document.getElementById('active-template-name');
